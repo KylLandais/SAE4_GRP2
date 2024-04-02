@@ -28,7 +28,7 @@ router.post('', async (req, res) => {
         const grade = userToRenew.grade;
 
         await pool.query('UPDATE user SET grade = ? WHERE email = ?', [
-          grade.id,
+          grade,
           user.email,
         ]);
       } else {
