@@ -553,6 +553,9 @@ app.use('/api/admin/getGradesSales', getGradesSales);
 import updateGrades from './api/admin/updateGrades.js';
 app.use('/api/admin/updateGrades', updateGrades);
 
+import removeProducts from './api/admin/removeProducts.js';
+app.use('/api/admin/removeProducts', removeProducts);
+
 import removeUser from './api/admin/removeUser.js';
 app.use('/api/admin/removeUser', removeUser);
 

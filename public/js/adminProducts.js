@@ -31,8 +31,21 @@ function closePopup() {
 }
 
 function deleteProduct(id) {
-  console.log(id);
+  //console.log(id);
+  const product = products.find((product) => product.id == id);
+  //console.log(product)
+  if (!product) return userAlert('Produit introuvable');
+  fetch('/api/admin/removeProducts', {
+    method: 'POST',
+    body: JSON.stringify({
+      productId: id,
+    }),
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  });
 }
+
 
 function modifyProduct(e) {
   e.preventDefault();
