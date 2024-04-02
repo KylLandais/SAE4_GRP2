@@ -24,7 +24,7 @@ fetch('/api/user/leaderboard')
                 <p class="leaderboardUserRank">${index + 1}</p>
                 <span class="leaderboardUserSpan">
                   <img class="leaderboardUserPfp" src="${pfp}" alt="pfp">
-                  <p class="leaderboardUserPseudo">${user.username}</p>
+                  <p class="leaderboardUserPseudo">${user.username.replace(/[<>]/gi, '')}</p>
                 </span>
 
                 <p class="leaderboardUserScore" style="--xp_bar_width: ${xp_width};">${
