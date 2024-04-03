@@ -77,6 +77,9 @@ try {
 import homepage from './router/accueil.js';
 app.use('/', homepage);
 
+import event from './api/admin/addEvent.js';
+app.use('/api/admin/addEvent', event);
+
 import admin from './router/admin.js';
 app.use('/admin', admin);
 

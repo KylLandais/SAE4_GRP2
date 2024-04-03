@@ -1,29 +1,3 @@
-var products = [];
-fetch('/api/admin/products')
-  .then((res) => res.json())
-  .then((data) => {
-    if (data.success) {
-      console.log(data.products);
-      products = data.products;
-
-      const monthlySales = getMonthlySales();
-      showSalesLineGraph(monthlySales);
-      console.log(monthlySales);
-
-      const salesByProduct = getSalesByProduct();
-      console.log(salesByProduct);
-      showSalesBarChart(salesByProduct);
-    } else {
-      console.log(data.message);
-      userAlert(data.message);
-    }
-  });
-
-document.querySelectorAll('.productImage').forEach((el) => {
-  el.parentElement.style.backgroundColor = randomPastelColor(
-    el.parentElement.querySelector('h4').textContent
-  );
-});
 
 function closePopup() {
   document.getElementById('popup').remove();
@@ -41,7 +15,7 @@ function modifyProduct(e) {
   const formData = new FormData(form);
 
   //send the form data
-  fetch('/api/admin/product/edit', {
+  fetch('/api/admin/addEvent', {
     method: 'POST',
     body: formData,
   })
@@ -354,11 +328,11 @@ function showSales(id) {
 function addProduct(e) {
   e.preventDefault();
   //get the form data
-  const form = document.getElementById('addNewProductForm');
+  const form = document.getElementById('addEventForm');
   const formData = new FormData(form);
 
   //send the form data
-  fetch('/api/admin/product/add', {
+  fetch('/api/admin/addEvent', {
     method: 'POST',
     body: formData,
   })
@@ -373,168 +347,105 @@ function addProduct(e) {
     });
 }
 
+function addBuyerToEvent(eventId) {
+  const product = products.find((product) => product.id == eventId);
+  //show popup with list of sales
+  //pop up
+  const popup = document.createElement('div');
+  document.body.style.overflowY = 'hidden';
+  popup.classList.add('popup');
+  popup.setAttribute('id', 'popup');
+  const popupContent = document.createElement('div');
+  popupContent.classList.add('popupContent');
+
+  popup.addEventListener('click', (e) => {
+    if (e.target == popup) {
+      closePopup();
+    }
+  });
+
+  const popupTitle = document.createElement('h3');
+  popupTitle.innerText = 'Ajouter un acheteur à "' + product.name + '"';
+  popupTitle.classList.add('popupTitle');
+  const popupClose = document.createElement('button');
+  popupClose.innerText = 'Fermer';
+  popupClose.setAttribute('onclick', 'closePopup()');
+  popupClose.classList.add('adminStyleButton');
+  popupClose.classList.add('closeButton');
+  popupContent.appendChild(popupClose);
+  popupContent.appendChild(popupTitle);
+
+  const searchUserForm = document.createElement('form');
+  searchUserForm.classList.add('productDesc');
+  searchUserForm.classList.add('adminForm');
+  searchUserForm.setAttribute('id', 'searchUserForm');
+
+  const searchUserInput = document.createElement('input');
+  searchUserInput.setAttribute('type', 'text');
+  searchUserInput.setAttribute('name', 'email');
+  searchUserInput.setAttribute('placeholder', "Email de l'acheteur");
+  searchUserForm.appendChild(searchUserInput);
+
+  const searchUserResults = document.createElement('div');
+  searchUserResults.setAttribute('id', 'searchUserResults');
+  searchUserForm.appendChild(searchUserResults);
+
+  searchUserInput.addEventListener('keyup', (e) => {
+    if (e.target.value.length < 3) return;
+    const email = e.target.value;
+    fetch('/api/admin/searchUser', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        value: email,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          console.log(data.results);
+          searchUserResults.innerHTML = '';
+          if (data.results.length == 0) {
+            const noResults = document.createElement('p');
+            noResults.innerText = 'Aucun résultat';
+            searchUserResults.appendChild(noResults);
+
+            const addUserButton = document.createElement('button');
+            addUserButton.innerText = 'Ajouter ' + email;
+            addUserButton.classList.add('adminButton');
+            searchUserResults.appendChild(addUserButton);
+
+            addUserButton.addEventListener('click', (e) => {
+              e.preventDefault(); //prevent parent form from submitting
+              addBuyer(eventId, email);
+            });
+          } else {
+            data.results.forEach((user) => {
+              const userDiv = document.createElement('div');
+              userDiv.classList.add('user');
+              userDiv.title = user.email;
+              const userName = document.createElement('p');
+              userName.classList.add('sale');
+              userName.classList.add('clickable');
+              userName.innerText = user.email + ' (' + user.username + ')';
+              userDiv.appendChild(userName);
+              userDiv.addEventListener('click', (e) => { addBuyer(eventId, user.email)});
+              searchUserResults.appendChild(userDiv);
+            });
+          }
+        } else {
+          userAlert(data.message);
+        }
+      });
+  });
+
+  popupContent.appendChild(searchUserForm);
+  popup.appendChild(popupContent);
+  document.body.appendChild(popup);
+}
 
 document
-  .getElementById('addNewProductForm')
+  .getElementById('addEventForm')
   .addEventListener('submit', addProduct);
-
-function addBuyer(productId, email) {
-  const options = prompt(
-    'Taille et/ou couleur (laisser vide si non-applicable)'
-  );
-  if(options === null) return;
-
-  fetch('/api/admin/products/addBuyer', {
-    method: 'POST',
-    body: JSON.stringify({
-      productId: productId,
-      buyer: email,
-      options: options,
-    }),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.success) {
-        userAlertGood(data.message);
-        closePopup();
-        location.reload();
-      } else {
-        userAlert(data.message);
-      }
-    });
-}
-
-//graphs
-
-const salesLineGraph = document.getElementById('salesLineGraph');
-const salesBarChart = document.getElementById('salesBarChart');
-
-// monthly sales in line graph using sales lists from products list (product.sales.date)
-function getMonthlySales() {
-  const months = [];
-  const salesByMonth = [];
-  const amountByMonth = [];
-
-  products.forEach((product) => {
-    product.sales.forEach((sale) => {
-      const saleDate = new Date(sale.date);
-      //sale month and year. Month in locale letters
-      const saleMonth = saleDate.toLocaleString('fr-FR', {
-        month: 'long',
-      });
-      const saleYear = saleDate.getFullYear();
-      const saleMonthYear = saleMonth + ' ' + saleYear;
-
-      if (!months.includes(saleMonthYear)) {
-        months.push(saleMonthYear);
-        salesByMonth.push(1);
-        amountByMonth.push(sale.price);
-      } else {
-        const index = months.indexOf(saleMonthYear);
-        salesByMonth[index]++;
-        amountByMonth[index] += sale.price;
-      }
-    });
-  });
-
-  //invert the arrays (oldest to newest)
-  months.reverse();
-  salesByMonth.reverse();
-  amountByMonth.reverse();
-
-  return {months, salesByMonth, amountByMonth};
-}
-
-function showSalesLineGraph(monthlySales) {
-  const salesLineGraphChart = new Chart(salesLineGraph, {
-    type: 'line',
-    data: {
-      labels: monthlySales.months,
-      datasets: [
-        {
-          label: 'Ventes mensuelles',
-          data: monthlySales.salesByMonth,
-          yAxisID: 'linear',
-          fill: true,
-          backgroundColor: 'rgba(75, 192, 192, 0.2)',
-          borderColor: 'rgb(75, 192, 192, 0.5)',
-          tension: 0.1,
-        },
-        {
-          label: 'Montant mensuel',
-          data: monthlySales.amountByMonth,
-          yAxisID: 'logarithmic',
-          fill: true,
-          backgroundColor: 'rgba(255, 99, 132, 0.2)',
-          borderColor: 'rgb(255, 99, 132)',
-          tension: 0.25,
-        },
-      ],
-    },
-    options: {
-      scales: {
-        linear: {
-          type: 'linear',
-          position: 'left',
-          ticks: {
-            beginAtZero: true,
-            stepSize: 1,
-          },
-        },
-        logarithmic: {
-          type: 'linear',
-          position: 'right',
-          ticks: {
-            // Adjust the min value to avoid issues with log scale
-            stepSize: 10,
-          },
-        },
-      },
-      responsive: true,
-      maintainAspectRatio: false,
-    },
-  });
-}
-
-// sales by product in bar chart using sales count from products list (product.sales.length)
-function getSalesByProduct() {
-  const sales = [];
-  const productsNames = [];
-  const salesByProduct = [];
-  products.forEach((product) => {
-    productsNames.push(product.name);
-    salesByProduct.push(product.sales.length);
-  });
-  return {productsNames, salesByProduct};
-}
-
-function showSalesBarChart(salesByProduct) {
-  const salesBarChartChart = new Chart(salesBarChart, {
-    type: 'bar',
-    data: {
-      labels: salesByProduct.productsNames,
-      datasets: [
-        {
-          label: 'Ventes par produit',
-          data: salesByProduct.salesByProduct,
-          borderWidth: 1,
-        },
-      ],
-    },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: {
-            stepSize: 0.5,
-          },
-        },
-      },
-      responsive: true,
-      maintainAspectRatio: false,
-    },
-  });
-}
