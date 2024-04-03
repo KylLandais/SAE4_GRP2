@@ -2,7 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import fs from 'fs';
 
-console.log('feur')
+
 var storage = multer.diskStorage({
   destination: './public/images/events/',
   filename: function (req, file, cb) {
@@ -17,7 +17,7 @@ const router = express.Router();
 
 import {pool} from '../../server.js';
 
-router.post('', upload.single('image'), async (req, res) => {
+router.post('', upload.single('eventImg'), async (req, res) => {
   try {
     if (!req.session.isLoggedIn || req.session.category !== 'admin') {
       //delete the uploaded file
@@ -34,16 +34,16 @@ router.post('', upload.single('image'), async (req, res) => {
     }
     //extract data from multipart form
     var {
-      name,
-      price,
-      date,
+      eventName,
+      eventPrice,
+      eventDate,
     } = req.body;
 
     //check all the fields are filled
     if (
-      name === '' ||
-      price === '' ||
-      date === ''
+      eventName === '' ||
+      eventPrice === '' ||
+      eventDate === ''
     ) {
       //delete the uploaded file
       if (req.file) {
@@ -51,12 +51,13 @@ router.post('', upload.single('image'), async (req, res) => {
       }
       res.status(403).json({success: false, message: 'Missing data'});
       return;
-    }
+    } else {
 
     //sanitize the price, name and description
-    price = price.replace(',', '.');
-    name = name.trim();
-
+      eventPrice = eventPrice.replace(',', '.');
+      eventName = eventName.trim()
+      
+    }
     // Check if file was uploaded
     if (!req.file) {
       //send error message
@@ -83,16 +84,16 @@ router.post('', upload.single('image'), async (req, res) => {
           .query(
             'INSERT INTO event (name, price, date, image) VALUES (?, ?, ?, ?)',
             [
-              name,
-              price,
-              date,
+              eventName,
+              eventPrice,
+              eventDate,
               `${imageName}`
             ]
           )
           .then(async () => {
             const [product] = await pool.query(
               'SELECT * FROM event WHERE name = ?',
-              [name]
+              [eventName]
             );
             res.status(200).json({success: true, message: 'Event ajouté'});
           })

@@ -59,7 +59,7 @@ DROP TABLE IF EXISTS `event`;
 /*!40101 SET character_set_client = utf8 */
 ;
 CREATE TABLE `event` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) DEFAULT NULL,
   `price` float DEFAULT NULL,
   `date` datetime DEFAULT NULL,
