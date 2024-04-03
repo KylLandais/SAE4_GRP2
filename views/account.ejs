@@ -47,6 +47,9 @@
           
           <h2><%= username %></h2>
           <p id="xpAmount"><em><%= xp %> xp</em></p>
+          <br>
+          <br>
+          <a id="linkToAdminPanel"></a>
         </div>
         <div id="personnalInfo">
           <p id="identityP"></p>
@@ -222,6 +225,16 @@
   </body>
   <script src="/js/logic.js"></script>
   <script>
+    const category = '<%= category %>';
+
+    console.log(category)
+    if (category === 'admin') {
+      document.getElementById("linkToAdminPanel").innerHTML = "Panel Administrateur";
+      document.getElementById("linkToAdminPanel").setAttribute ("href", "https://localhost/admin");
+
+      console.log("admin")
+    }
+
     if (document.body.getAttribute('data-theme') == 'dark') {
       document.querySelector('button').innerHTML = 'Theme clair';
     } else {
