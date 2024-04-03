@@ -374,7 +374,9 @@
           products.forEach((product) => {
             console.log(product)
             const productItem = document.createElement('li');
-            productItem.innerHTML = product.name + ' - ' + product.price;
+            let date = product.purchase_date;
+
+            productItem.innerHTML = product.name + ' - ' + product.price + ' €' + ' date d\'achat : '+ date.slice(0,10)+ ' '+ date.slice(11,19);
             productsList.appendChild(productItem);
           });
           document.getElementById('produitsList').appendChild(productsList);
