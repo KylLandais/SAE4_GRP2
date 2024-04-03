@@ -31,23 +31,25 @@ function closePopup() {
 }
 
 function deleteProduct(id) {
-  //console.log(id);
   const product = products.find((product) => product.id == id);
-  //console.log(product)
   if (!product) return userAlert('Produit introuvable');
-  if (confirm('Voulez vous vraiment supprimer ce produit ?')){
-    fetch('/api/admin/removeProducts', {
-      method: 'POST',
-      body: JSON.stringify({
-        productId: id,
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
-    setTimeout(function(){
-      location.reload();
-    }, 250)
+  if(product.sales.length == 0){
+    if (confirm('Voulez vous vraiment supprimer ce produit ?')){
+      fetch('/api/admin/removeProducts', {
+        method: 'POST',
+        body: JSON.stringify({
+          productId: id,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      setTimeout(function(){
+        location.reload();
+      }, 250)
+    }
+  }else{
+    alert("Le produit ne peut pas être supprimé. Des personnes ont acheté ce produit")
   }
 }
 
