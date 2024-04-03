@@ -307,6 +307,13 @@ async function addUserToEventWithXp(
       email,
     ]);
 
+    if (itemId === 2) {
+      await pool.query('INSERT INTO usersToRenew VALUES(?, ?)', [
+        email,
+        itemId,
+      ]);
+    }
+
     //add a transaction content line to the database referencing the transaction_id
     await pool.query(
       'INSERT INTO transactionContent (transaction_id, grade_id, item_name, item_price) VALUES (?, ?, ?, ?)',

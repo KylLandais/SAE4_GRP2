@@ -171,7 +171,40 @@
         
       </form>
     </div>
-   
+    <div class="adminItem">
+      <h3>Mettre à jour les grades</h3>
+      <form
+        style="display: flex; flex-direction: column"
+        id="startSemesterForm"
+        class="adminForm"
+      >
+        <span>
+          <p for="startSemester">Actions de début de semestre</p>
+          
+          <button type="submit">Valider</button>
+        </span>
+      </form>
+    </div>
+    <div id="inscriptionsTitle">
+      <h2>Inscriptions</h2>
+      <button class="filterButton" onclick="filterByUpcoming(this)">
+        Uniquement à venir
+      </button>
+      <span id="sortingOptions">
+        <h3>Tri</h3>
+        <p>(Par date)</p>
+        <button
+          class="sortButton decroissant"
+          onclick="sortDecroissant()"
+          title="Tri décroissant"
+        ></button
+        ><button
+          class="sortButton croissant"
+          onclick="sortCroissant()"
+          title="Tri croissant"
+        ></button>
+      </span>
+    </div>
   </body>
   <script>
     const tableContainer = document.getElementById('adminBody');
