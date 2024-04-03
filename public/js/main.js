@@ -15,20 +15,11 @@ function hashPass(password) {
     hash = (hash << 5) - hash + chr;
     hash |= 0; // Convert to 32bit integer
   }*/
-  const hashValue = password =>
-  crypto.subtle
-    .digest('SHA-256', new TextEncoder('utf-8').encode(password))
-    .then(h => {
-      let hexes = [],
-        view = new DataView(h);
-      for (let i = 0; i < view.byteLength; i += 4)
-        hexes.push(('00000000' + view.getUint32(i).toString(16)).slice(-8));
-      return hexes.join('');
-    });
-
-    let value = hashValue(JSON.stringify({ a: 'a', b: [1, 2, 3, 4], foo: { c: 'bar' } })).then(console.log)
-    console.log(value);
-    return value
+  
+  const crypto = require('crypto');
+  const hash = crypto.getHashes();
+  hashPwd = crypto.createHash('sha1').update(password).digest('hex');
+  return hashPwd
 
 }
 
