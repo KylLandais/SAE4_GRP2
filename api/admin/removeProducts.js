@@ -9,19 +9,41 @@ router.post('', async (req, res) => {
     return;
   }
 
-  if (confirm('Voulez vous vraiment supprimer ce produit ?')) {
-    await pool.query(
-        'DELETE FROM product WHERE id = ?',
-        [productId],
-        (err) => {
-          if (err) {
-            console.error('Impossible de supprimer le produit :', err);
-            res.status(500).json({error: 'Impossible de supprimer le produit'});
-            return;
-          }
+  await pool.query(
+    'DELETE FROM product_size WHERE product_id = ?',
+    [productId],
+    (err) => {
+      if (err) {
+        console.error('Impossible de supprimer la ref couleur du produit :', err);
+        res.status(500).json({error: 'Impossible de supprimer la ref couleur du produit'});
+        return;
+      }
+    }
+  );
+
+  await pool.query(
+    'DELETE FROM product_color WHERE product_id = ?',
+    [productId],
+    (err) => {
+      if (err) {
+        console.error('Impossible de supprimer la ref couleur du produit :', err);
+        res.status(500).json({error: 'Impossible de supprimer la ref couleur du produit'});
+        return;
+      }
+    }
+  );
+
+  await pool.query(
+      'DELETE FROM product WHERE id = ?',
+      [productId],
+      (err) => {
+        if (err) {
+          console.error('Impossible de supprimer le produit :', err);
+          res.status(500).json({error: 'Impossible de supprimer le produit'});
+          return;
         }
-    );
-  }
+      }
+  );
 });
 
 export default router;

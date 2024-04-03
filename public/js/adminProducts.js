@@ -35,15 +35,20 @@ function deleteProduct(id) {
   const product = products.find((product) => product.id == id);
   //console.log(product)
   if (!product) return userAlert('Produit introuvable');
-  fetch('/api/admin/removeProducts', {
-    method: 'POST',
-    body: JSON.stringify({
-      productId: id,
-    }),
-    headers: {
-      'Content-Type': 'application/json',
-    }
-  });
+  if (confirm('Voulez vous vraiment supprimer ce produit ?')){
+    fetch('/api/admin/removeProducts', {
+      method: 'POST',
+      body: JSON.stringify({
+        productId: id,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    setTimeout(function(){
+      location.reload();
+    }, 250)
+  }
 }
 
 
