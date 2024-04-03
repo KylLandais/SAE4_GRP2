@@ -88,9 +88,33 @@ document.getElementById('payButton').addEventListener('click', () => {
   checkout(cart);
 });
 
+
+function changeNumber(cpt) {
+  fetch("/api/user/getCartItems", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success) {
+        cart = data.items;
+      } else {
+        userAlert("Une erreur est survenue")}});
+  document.getElementById("productPrice" + cart[cpt].identifier.id).innerHTML = 
+  document.getElementById("productQuantity" + cart[cpt].identifier.id).getAttribute("value") * cart[cpt].price
+        
+  cart[' + cpt + '].quantity = +document.getElementById("productQuantity" + cart[cpt].identifier.id).getAttribute("value") ; console.log(cart);
+  console.log(document.getElementById("productQuantity" + cart[cpt].identifier.id ).getAttribute("value"));
+  console.log(document.getElementById("productQuantity" + cart[cpt].identifier.id ).innerHTML); cart[cpt].quantity = 45;
+  session.cart = cart
+}
+
 function useCartItems(cart) {
   console.log(cart);
   let total = 0;
+  let cpt = 0
   cart.forEach((item) => {
     const listItem = document.createElement('li');
 
@@ -99,23 +123,43 @@ function useCartItems(cart) {
 
     const title = document.createElement('p');
     const priceElement = document.createElement('p');
+    const quantity = document.createElement('input');
     const toggleSelector = document.createElement('div');
     const id = item.identifier.id;
     const type = item.identifier.type;
+
     let name = item.name;
     if (item.size) {
       name += ' (' + item.size.toUpperCase() + ')';
     }
+    title.innerText = name;
+
+
+    quantity.setAttribute('type', 'number')
+    quantity.setAttribute('min', 1)
+    quantity.setAttribute('value', item.quantity)
+    quantity.setAttribute('step', 1)
+    quantity.setAttribute("id", "productQuantity" + item.identifier.id);
+    if (item.identifier.type === "product") {
+      quantity.setAttribute('onchange', 'changeNumber(' + cpt + ')')
+    } else {
+      quantity.setAttribute('max', 1)
+    }
+    cpt++
+
     const price = item.price;
     total += price;
-    title.innerText = name;
     priceElement.innerText = price.toFixed(2) + '€';
+    priceElement.setAttribute("id", "productPrice" + item.identifier.id);
+
+
     toggleSelector.classList.add('toggleSelector');
     listItem.setAttribute('data-id', id);
     listItem.setAttribute('data-type', type);
     listItem.setAttribute('data-price', price);
 
     spanItem.appendChild(title);
+    spanItem.appendChild(quantity)
     spanItem.appendChild(priceElement);
     spanItem.appendChild(toggleSelector);
     listItem.appendChild(spanItem);
