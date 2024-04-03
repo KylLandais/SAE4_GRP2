@@ -495,6 +495,9 @@ app.use('/api/user/getAgenda', getEvents);
 import getEventsUser from './api/user/getEventsUser.js';
 app.use('/api/user/getEventsUser', getEventsUser);
 
+import getProductsUser from './api/user/getProductsUser.js';
+app.use('/api/user/getProductsUser', getProductsUser);
+
 import getPodiumPfps from './api/user/getPodiumPfps.js';
 app.use('/api/user/getPodiumPfps', getPodiumPfps);
 
