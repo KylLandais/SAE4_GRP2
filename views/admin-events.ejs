@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/shop.css" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.js"></script>
+
+    <title>Events Admin</title>
+  </head>
+  <body id="adminBody" data-theme="dark">
+    <div>
+      <a href="/" id="backButton" class="adminButton">Retour</a>
+      <h1>Administration des Events</h1>
+      <button id="themeSwitcher" class="headerButton" onclick="switchTheme(this)">Theme sombre</button>
+      <a href="/admin/products/" class="adminButton">Gérer les produits</a>
+    </div>
+
+    <div id="inscriptionsTitle">
+      <form class="adminForm productDesc" id="addEventForm">
+        <h4>Ajouter un Event</h4>
+          <input type="text" name="eventName" placeholder="Nom">
+          <input type="number" name="eventPrice" id="productPrice" placeholder="Prix" min="0" step="0.01" > 
+          <input type="datetime-local" name="eventDate">
+          <input type="file" name="eventImg">
+          <input type="submit" value="Créer un Event" class="adminButton">
+
+      </form>
+  </div>
+
+    <div id="inscriptionsTitle">
+      <h2>Inscriptions</h2>
+      <button class="filterButton" onclick="filterByUpcoming(this)">
+        Uniquement à venir
+      </button>
+      <span id="sortingOptions">
+        <h3>Tri</h3>
+        <p>(Par date)</p>
+        <button
+          class="sortButton decroissant"
+          onclick="sortDecroissant()"
+          title="Tri décroissant"
+        ></button
+        ><button
+          class="sortButton croissant"
+          onclick="sortCroissant()"
+          title="Tri croissant"
+        ></button>
+      </span>
+    </div>
+
+    
+  </body>
+  <script>
+    const tableContainer = document.getElementById('adminBody');
+
+    const extractNameFromEmail = (email) => {
+      const parts = email.split('@')[0].split('.');
+      const firstName = parts[0];
+      const lastName = parts[1];
+
+      return firstName + ' ' + lastName;
+    };
+
+    
+
+    function searchUser(eventId) {
+      //pop up
+      const popup = document.createElement('div');
+      popup.classList.add('popup');
+      popup.setAttribute('id', 'popup');
+      const popupContent = document.createElement('div');
+      popupContent.classList.add('popupContent');
+      
+      const popupTitle = document.createElement('h3');
+      popupTitle.classList.add('popupTitle');
+      popupTitle.innerText = 'Ajouter un participant';
+      const popupInput = document.createElement('input');
+      popupInput.setAttribute('type', 'text');
+      popupInput.setAttribute('id', 'searchUserInput');
+      popupInput.setAttribute('name', 'searchUserInput');
+      popupInput.classList.add('adminStyleInput');
+      popupInput.setAttribute('placeholder', 'Rechercher un utilisateur');
+      popupInput.addEventListener('input', (e) => {
+        const value = e.target.value;
+        if (value.length > 0) {
+          fetch('/api/admin/searchUser', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ value, eventId }),
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              showUsers(data.results, data.inscriptions, eventId);
+            });
+        } else {
+          document.getElementById('searchUserResults').innerHTML = '';
+        }
+      });
+      const popupClose = document.createElement('button');
+      popupClose.innerText = 'Fermer';
+      popupClose.setAttribute('onclick', 'closePopup()');
+      popupClose.classList.add('adminStyleButton');
+      popupClose.classList.add('closeButton');
+      popupContent.appendChild(popupTitle);
+      popupContent.appendChild(popupInput);
+      popupContent.appendChild(popupClose);
+      var searchUserResults = document.createElement('div');
+      searchUserResults.setAttribute('id', 'searchUserResults');
+      popupContent.appendChild(searchUserResults);
+
+      popup.appendChild(popupContent);
+      document.body.appendChild(popup);
+      
+      popupInput.focus();
+    }
+
+    function closePopup() {
+      document.getElementById('popup').remove();
+    }
+
+    function showUsers(users, inscriptions, eventId) { 
+      searchUserResults = document.getElementById('searchUserResults');
+      searchUserResults.innerHTML = '';
+
+      if(users.length === 0) {
+        const userContainer = document.createElement('div');
+        userContainer.classList.add('userContainer');
+        
+        const userName = document.createElement('p');
+        userName.innerText = 'Aucun utilisateur trouvé';
+        const userButton = document.createElement('button');
+        userButton.innerText = 'Créer un utilisateur';
+        userButton.classList.add('adminStyleButton');
+        userButton.setAttribute(
+          'onclick',
+          `createUser('${eventId}')`
+        );
+        userContainer.appendChild(userName);
+        userContainer.appendChild(userButton);
+        
+        searchUserResults.appendChild(userContainer);
+      }
+      
+      users.forEach((user) => {
+        const userContainer = document.createElement('div');
+        userContainer.classList.add('userContainer');
+
+        const userInfo = user.email + ' ('+ user.username+')';
+        
+        const userName = document.createElement('p');
+        userName.innerText = userInfo;
+        userContainer.appendChild(userName);
+
+        if(inscriptions.includes(user.email)) {
+          const userAdded = document.createElement('p');
+          userAdded.innerText = 'Inscrit';
+          userContainer.appendChild(userAdded);
+        } else{
+          const userButton = document.createElement('button');
+          userButton.innerText = 'Ajouter';
+          userButton.classList.add('adminStyleButton');
+          userButton.setAttribute(
+            'onclick',
+            `addUser('${user.email}', '${eventId}')`
+          );
+          userContainer.appendChild(userButton);
+        }
+
+        
+        searchUserResults.appendChild(userContainer);
+      });
+      
+    }
+    
+    function createUser(eventId){
+      var email = prompt("Entrez l'email");
+      if(!email || email === '') return;
+      addUser(email, eventId)
+    }
+
+    function addUser(email, eventId) { 
+      var areYouSure = confirm('Voulez-vous vraiment ajouter cet utilisateur ?');
+      if(!areYouSure) return;
+
+      const xp = prompt("Entrez la quantité d'xp que rapporte cet event à cet utilisateur");
+
+      if (email) {
+        fetch('/api/admin/addUser', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({email, eventId, xp}),
+        }).then((res) => {
+          if (res.status === 200) {
+            userAlertGood('Utilisateur ajouté. Rafraichir la page pour voir les changements');
+            
+          } else {
+            userAlert("Erreur lors de l'ajout de l'utilisateur");
+          }
+        });
+      }
+     }
+
+    function removeParticipant(email, eventId) {
+      var areYouSure = confirm('Voulez-vous vraiment supprimer cet utilisateur ?');
+      if(!areYouSure) return;
+
+      fetch('/api/admin/removeUser', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({email, eventId}),
+      }).then((res) => {
+        if (res.status === 200) {
+          userAlertGood('Utilisateur supprimé. Rafraichir la page pour voir les changements');
+          
+        } else {
+          userAlert("Erreur lors de la suppression de l'utilisateur");
+        }
+      });
+    }
+
+    fetch('/api/admin/getEvents')
+      .then((res) => res.json())
+      .then((data) => {
+        showEvents(data.events);
+      });
+
+    function expand(eventId){
+      console.log(`[data-date="${eventId}"]`);
+      const eventContainer = document.querySelector('.eventContainer.event'+eventId);
+      const eventParticipants = eventContainer.querySelector('ul');
+      const expandButton = eventContainer.querySelector('.expandButton');
+      if(eventParticipants.style.display === 'none') {
+        eventParticipants.style.display = 'flex';
+        expandButton.innerText = 'Cacher';
+      } else {
+        eventParticipants.style.display = 'none';
+        expandButton.innerText = 'Voir';
+      }
+    }
+
+    function showEvents(events) { 
+    events.forEach((element) => {
+      
+      //display the name, price and date of the event. Then, display the list of participants
+      const eventContainer = document.createElement('div');
+      eventContainer.classList.add('eventContainer');
+      const eventName = document.createElement('h3');
+      eventName.innerText = element.name + ' - ' + element.price + '€';
+
+      const eventDate = document.createElement('p');
+
+      //extract the date and time from the element.date
+      const date = new Date(element.date);
+      const day = date.getDate();
+      const month = date.getMonth() + 1;
+      const year = date.getFullYear();
+      const hour = date.getHours();
+      const minutes = date.getMinutes();
+      const finalDate =
+        day + '/' + month + '/' + year + ' à ' + hour + 'h' + minutes;
+
+      eventDate.innerText = 'Le ' + finalDate;
+      eventDate.classList.add('eventDate');
+      const listName = document.createElement('p');
+      listName.innerText = 'Participants : (' + element.users.length + ')';
+      const nameSpan = document.createElement('span');
+      nameSpan.appendChild(listName);
+
+      const expand = document.createElement('button');
+      expand.classList.add('expandButton');
+      expand.innerText = 'Voir';
+      expand.setAttribute('onclick', `expand('${element.id}')`);
+      nameSpan.appendChild(expand);
+
+      const pdfButton = document.createElement('button');
+      pdfButton.classList.add('generate-pdf');
+      pdfButton.classList.add('adminStyleButton');
+      pdfButton.innerText = 'Générer PDF';
+      pdfButton.setAttribute('onclick', `generatePDF('${element.id}')`);
+      nameSpan.appendChild(pdfButton);
+
+      const addButton = document.createElement('div');
+      addButton.classList.add('plusButton');
+      addButton.setAttribute('onclick', `searchUser('${element.id}')`);
+      nameSpan.appendChild(addButton);
+
+      
+
+      const eventParticipants = document.createElement('ul');
+      if (element.users.length > 0) {
+        element.users.forEach((participant) => {
+          const participantItem = document.createElement('li');
+          const participantSpan = document.createElement('span');
+          const participantName = document.createElement('p');
+          participantName.innerText = extractNameFromEmail(participant);
+
+          const participantButton = document.createElement('button');
+          participantButton.innerText = 'Supprimer';
+          participantButton.setAttribute(
+            'onclick',
+            `removeParticipant('${participant}', '${element.id}')`
+          );
+
+          participantSpan.appendChild(participantName);
+          participantSpan.appendChild(participantButton);
+          participantItem.appendChild(participantSpan);
+
+          eventParticipants.appendChild(participantItem);
+        });
+      } else {
+        const participantItem = document.createElement('p');
+        participantItem.innerText = 'Aucun participant';
+        eventParticipants.appendChild(participantItem);
+      }
+      eventParticipants.style.display = 'none';
+
+      eventContainer.classList.add('event'+element.id);
+      eventContainer.setAttribute('data-date', date);
+      eventContainer.appendChild(eventName);
+      eventContainer.appendChild(eventDate);
+      eventContainer.appendChild(nameSpan);
+      eventContainer.appendChild(eventParticipants);
+      tableContainer.appendChild(eventContainer);
+    });
+     }
+
+    
+
+    function sort(croissant) {
+      const events = document.querySelectorAll('.eventContainer');
+
+      //sort the events by date
+      const sortedEvents = Array.from(events).sort((a, b) => {
+        const dateA = new Date(a.getAttribute('data-date'));
+        const dateB = new Date(b.getAttribute('data-date'));
+
+        if (croissant) return dateA - dateB;
+
+        return dateB - dateA;
+      });
+
+      tableContainer.querySelectorAll('.eventContainer').forEach((event) => {
+        event.remove();
+      });
+
+      sortedEvents.forEach((event) => {
+        tableContainer.appendChild(event);
+      });
+    }
+
+    function sortDecroissant() {
+      sort(false);
+    }
+
+    function sortCroissant() {
+      sort(true);
+    }
+
+    function filterByUpcoming(elem) {
+      elem.innerText = 'Tous';
+      elem.setAttribute('onclick', 'noFilter(this)');
+
+      const events = document.querySelectorAll('.eventContainer');
+      let nbElem = events.length;
+      events.forEach((event) => {
+        const date = new Date(event.getAttribute('data-date'));
+        const now = new Date();
+        if (date < now) {
+          event.style.display = 'none';
+          nbElem--;
+        }
+      });
+      if (nbElem === 0) {
+        const noEvent = document.createElement('p');
+        noEvent.classList.add('noEvent');
+        noEvent.innerText = 'Aucun évènement à venir';
+        tableContainer.appendChild(noEvent);
+      }
+    }
+
+    function noFilter(elem) {
+      elem.innerText = 'Uniquement à venir';
+      elem.setAttribute('onclick', 'filterByUpcoming(this)');
+
+      const events = document.querySelectorAll('.eventContainer');
+      let nbElem = events.length;
+      if (document.querySelector('.noEvent')) {
+        document.querySelector('.noEvent').remove();
+      }
+      events.forEach((event) => {
+        event.style.display = 'block';
+      });
+    }
+
+    function enableInput(elem) {
+      document.getElementById(elem).removeAttribute('disabled');
+      document.getElementById('validateForm').style.display = 'block';
+
+      //get the button that is sibbling to the input
+      const button = document.getElementById(elem).nextElementSibling;
+
+      button.innerText = 'Annuler';
+      button.setAttribute('onclick', `disableInput('${elem}')`);
+    }
+
+    function disableInput(elem) {
+      document.getElementById(elem).setAttribute('disabled', true);
+      document.getElementById('validateForm').style.display = 'none';
+
+      //get the button that is sibbling to the input
+      const button = document.getElementById(elem).nextElementSibling;
+
+      button.innerText = 'Modifier';
+      button.setAttribute('onclick', `enableInput('${elem}')`);
+    }
+
+    document.querySelectorAll('.gradeprice:not(.xpamount)').forEach((elem) => {
+      elem.setAttribute('disabled', true);
+    });
+
+    document.getElementById('changeXpForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const xpAmount = document.getElementById('xpAmount').value;
+      const data = {
+        xpAmount,
+      };
+      fetch('/admin/changeXp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      }).then((res) => {
+        if (res.status === 200) {
+          userAlert("Quantité d'xp que rapportent les events modifiée");
+          window.location.reload();
+        } else if (res.status === 400) {
+          userAlert("La quantité d'xp doit être un nombre");
+        } else {
+          userAlert('Erreur lors de la modification des xp');
+        }
+      });
+    });
+
+    document
+      .getElementById('changeXpThresholdForm')
+      .addEventListener('submit', (e) => {
+        e.preventDefault();
+        const xpAmount = document.getElementById('xpThreshold').value;
+        const data = {
+          xpThreshold,
+        };
+        fetch('/api/admin/changeXpThreshold', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        }).then((res) => {
+          if (res.status === 200) {
+            userAlert("Seuil d'xp pour renouveller le grade modifié");
+            window.location.reload();
+          } else if (res.status === 400) {
+            userAlert("La quantité d'xp doit être un nombre");
+          } else {
+            userAlert('Erreur lors de la modification des xp');
+          }
+        });
+      });
+
+    function generatePDF(eventId) {
+      const users = document.querySelectorAll(
+        '.eventContainer.event' + eventId + ' ul li span p'
+      );
+
+      // Choose the element that our invoice is rendered in.
+      const title = document.createElement('h1');
+      title.classList.add('pdfText');
+      var eventName = document.querySelector(
+        '.eventContainer.event' + eventId + ' h3'
+      ).innerText;
+      eventName = eventName.split(' - ')[0];
+      title.innerHTML = 'Inscriptions pour ' + eventName + ' :';
+
+      const container = document.createElement('div');
+      container.classList.add('pdfContainer');
+      container.appendChild(title);
+
+      users.forEach((element) => {
+        const textElement = document.createElement('p');
+        textElement.innerHTML = '☐ ' + element.innerText;
+        textElement.classList.add('pdfText');
+        container.appendChild(textElement);
+      });
+
+      //set the margin and the font size
+      const opt = {
+        margin: 0.3,
+        filename: `inscriptions_${eventName}.pdf`,
+        image: {type: 'jpeg', quality: 0.98},
+        html2canvas: {scale: 2},
+        jsPDF: {unit: 'in', format: 'letter', orientation: 'portrait'},
+      };
+
+      // Choose the element and save the PDF for our user.
+      html2pdf().from(container).set(opt).save();
+    };
+
+  </script>
+  <script src="/js/logic.js"></script>
+  <script src="/js/adminEvent.js"></script>
+</html>
