@@ -104,7 +104,7 @@
               <li>Accès aux bénéfices du parrainage (bonus d'xp)</li>
             </ul>
           </div>
-          <button class="gradeBuyButton b0"><%= ironprice %>€</button>
+          <button class="gradeBuyButton b0" id="ironButton"><%= ironprice %>€</button>
         </div>
         <div class="grade">
           <img src="/graphics/Gold_Ingot_JE4_BE2.png" alt="" />
@@ -117,7 +117,7 @@
               <li>Soirées privées du BDE</li>
             </ul>
           </div>
-          <button class="gradeBuyButton b1"><%= goldprice %>€</button>
+          <button class="gradeBuyButton b1" id="goldButton"><%= goldprice %>€</button>
         </div>
         <div class="grade">
           <img src="/graphics/11-2-minecraft-diamond.png" alt="" />
@@ -131,7 +131,7 @@
               <li>1 bon d'achat de 10€ sur l'entièreté du site</li>
             </ul>
           </div>
-          <button class="gradeBuyButton b2"><%= diamantprice %>€</button>
+          <button class="gradeBuyButton b2" id="diamButton"><%= diamantprice %>€</button>
         </div>
       </div>
       <p class="disclaimer">
@@ -217,6 +217,21 @@
     </footer>
   </body>
   <script>
+    const grade = '<%= grade %>';
+
+    if (grade === "2") {
+      document.getElementById("diamButton").disabled = true;
+      document.getElementById("diamButton").className = "gradeBuyButton b2 disabled";
+      
+    } if (grade >= "1") {
+      document.getElementById("goldButton").disabled = true;
+      document.getElementById("goldButton").className = "gradeBuyButton b1 disabled";
+
+    } if (grade >= "0") { 
+      document.getElementById("ironButton").disabled = true;
+      document.getElementById("ironButton").className = "gradeBuyButton b0 disabled";
+    }
+
     const decodedData = JSON.parse('<%- JSON.stringify(events) %>');
 
     window.calData = decodedData;
