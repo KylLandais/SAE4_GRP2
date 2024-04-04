@@ -111,19 +111,6 @@ function useCartItems(cart) {
     }
     title.innerText = name;
 
-
-    quantity.setAttribute('type', 'number')
-    quantity.setAttribute('min', 1)
-    quantity.setAttribute('value', item.quantity)
-    quantity.setAttribute('step', 1)
-    quantity.setAttribute("id", "productQuantity" + item.identifier.id);
-    if (item.identifier.type === "product") {
-      quantity.setAttribute('onchange', 'changeNumber(' + cpt + ')')
-    } else {
-      quantity.setAttribute('max', 1)
-    }
-    cpt++
-
     const price = item.price;
     total += price;
     priceElement.innerText = price.toFixed(2) + '€';
@@ -136,7 +123,6 @@ function useCartItems(cart) {
     listItem.setAttribute('data-price', price);
 
     spanItem.appendChild(title);
-    spanItem.appendChild(quantity)
     spanItem.appendChild(priceElement);
     spanItem.appendChild(toggleSelector);
     listItem.appendChild(spanItem);
