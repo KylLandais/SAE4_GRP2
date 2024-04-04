@@ -129,8 +129,8 @@ function useCartItems(cart) {
     const spanItem = document.createElement('span');
 
     const title = document.createElement('p');
-    const priceElement = document.createElement('p');
     const quantity = document.createElement('input');
+    const priceElement = document.createElement('p');
     const toggleSelector = document.createElement('div');
     const id = item.identifier.id;
     const type = item.identifier.type;
@@ -147,6 +147,7 @@ function useCartItems(cart) {
     quantity.setAttribute('value', item.quantity)
     quantity.setAttribute('step', 1)
     quantity.setAttribute("id", "productQuantity_" + item.identifier.id);
+    quantity.setAttribute('width', 5)
 
     if (item.identifier.type === "product") {
       quantity.setAttribute('onchange', 'quantityChanged(' + cpt +', ' + item.identifier.id +')')
