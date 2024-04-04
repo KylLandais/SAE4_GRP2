@@ -88,29 +88,6 @@ document.getElementById('payButton').addEventListener('click', () => {
   checkout(cart);
 });
 
-
-function changeNumber(cpt) {
-  fetch("/api/user/getCartItems", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.success) {
-        cart = data.items;
-      } else {
-        userAlert("Une erreur est survenue")}});
-  document.getElementById("productPrice" + cart[cpt].identifier.id).innerHTML = 
-  document.getElementById("productQuantity" + cart[cpt].identifier.id).getAttribute("value") * cart[cpt].price
-        
-  cart[' + cpt + '].quantity = +document.getElementById("productQuantity" + cart[cpt].identifier.id).getAttribute("value") ; console.log(cart);
-  console.log(document.getElementById("productQuantity" + cart[cpt].identifier.id ).getAttribute("value"));
-  console.log(document.getElementById("productQuantity" + cart[cpt].identifier.id ).innerHTML); cart[cpt].quantity = 45;
-  session.cart = cart
-}
-
 function useCartItems(cart) {
   console.log(cart);
   let total = 0;
