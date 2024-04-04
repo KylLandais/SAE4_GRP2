@@ -53,7 +53,7 @@
         </div>
         <div id="personnalInfo">
           <p id="identityP"></p>
-          <button onclick="changerClasse()">Modifier</button>
+          <button onclick="changerClasse()" id="idBoutonModifierGroupe">Modifier</button>
           <p>Adresse mail : <%= email %></p>
           <span></span>
           <p>Mot de passe : ********</p>
@@ -231,6 +231,9 @@
     if (category === 'admin') {
       document.getElementById("linkToAdminPanel").innerHTML = "Panel Administrateur";
       document.getElementById("linkToAdminPanel").setAttribute ("href", "https://localhost/admin");
+
+      document.getElementById("idBoutonModifierGroupe").style.visibility = "hidden"
+      document.getElementById("idBoutonModifierGroupe").disabled = true
 
       console.log("admin")
     }
