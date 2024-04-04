@@ -87,7 +87,6 @@ fetch('/api/user/getCartItems', {
 document.getElementById('payButton').addEventListener('click', () => {
   checkout(cart);
 });
-
 function useCartItems(cart) {
   console.log(cart);
   let total = 0;

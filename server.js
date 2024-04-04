@@ -659,7 +659,14 @@ app.post('/addItemToCartPort', (req, res) => {
   }
 
   const item = req.session.cart.find((item) => item.id === id);
-
+  const grade = req.session.cart.find((item) => item.type === 'grade');
+  console.log(grade)
+  if (grade && type === 'grade'){
+    res
+      .status(409)
+      .json({success: false, message: 'Un grade est déjà dans votre panier'});
+    return;
+  }
   if (!item) {
     if (size !== undefined && size !== null && type === 'product') {
       req.session.cart.push({type: type, id: id, size: size}); // add the item to the cart if it doesn't exist yet
@@ -670,7 +677,6 @@ app.post('/addItemToCartPort', (req, res) => {
       .json({success: false, message: 'Item déjà dans votre panier'});
     return;
   }
-
   res.status(200).json({success: true, message: 'Item added to cart'});
 });
 
