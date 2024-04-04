@@ -8,11 +8,15 @@
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/errors.css" />
   </head>
-  <body data-theme="light" class="md">
+  <body id="bodyblock" data-theme="light" class="md">
     <a href="/" id="backButton">Accueil</a>
     <div class="center">
       <h3>Oups, quelque chose s'est mal passé.</h3>
       <p>La page que vous cherchez n'existe pas, merci de vérifier l'url.</p>
     </div>
   </body>
+  <script src="/js/logic.js"></script>
+  <script>
+    document.getElementById('bodyblock').setAttribute('data-theme', getCookie('theme'))
+  </script>
 </html>
