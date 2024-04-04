@@ -229,7 +229,7 @@ function checkout(listOfItems) {
     .then((res) => res.json())
     .then((data) => {
       if (data.success) {
-        userAlertGood('Inscription réussie');
+        userAlertGood('Achat Effectué');
         setTimeout(() => {
           window.location.href = '/account';
         }, 1000);
