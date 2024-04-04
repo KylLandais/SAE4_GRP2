@@ -342,7 +342,7 @@
       const data = {
         xpAmount,
       };
-      fetch('/admin/changeXp', {
+      fetch('/api/admin/changeXpAmount', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -355,7 +355,7 @@
         } else if (res.status === 400) {
           userAlert("La quantité d'xp doit être un nombre");
         } else {
-          userAlert('Erreur lors de la modification des xp');
+          userAlert('Erreur lors de la modification des xp ' + res.status);
         }
       });
     });
@@ -364,7 +364,7 @@
       .getElementById('changeXpThresholdForm')
       .addEventListener('submit', (e) => {
         e.preventDefault();
-        const xpAmount = document.getElementById('xpThreshold').value;
+        const xpThreshold = document.getElementById('xpThreshold').value;
         const data = {
           xpThreshold,
         };
