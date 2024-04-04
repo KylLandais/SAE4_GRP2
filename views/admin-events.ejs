@@ -180,6 +180,9 @@
     
     function createUser(eventId){
       var email = prompt("Entrez l'email");
+      while(!email.includes(".etu@univ-lemans.fr")){
+        email = prompt("Entrez l'email");
+      }
       if(!email || email === '') return;
       addUser(email, eventId)
     }
