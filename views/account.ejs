@@ -21,6 +21,9 @@
         <a class="vanLink" onclick="setActiveNav(this)" href="#hspacer2"
           >Niveau d'xp</a
         >
+        <a class="vanLink" onclick="setActiveNav(this)" href="#hspacer5"
+          >Produits achetés</a
+        >
         <a class="vanLink" onclick="setActiveNav(this)" href="#hspacer3"
           >Grade</a
         >
@@ -86,6 +89,12 @@
 
           <p id="eventNum">Vous avez participé à 0 événements.</p>
         </div>
+
+        <div class="vspacer"></div>
+        <div class="spacer" id="hspacer5"></div>
+        <h2 id="xpInfoTitle" class="sectionTitle">Produits Achetés</h2>
+        <div id="produitsList"></div>
+
         <div class="vspacer"></div>
         <div class="spacer" id="hspacer3"></div>
         <h2 id="gradeInfoTitle" class="sectionTitle">Grade</h2>
@@ -351,6 +360,31 @@
         inline: 'center',
       });
     }
+
+    fetch('/api/user/getProductsUser', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          const products = data.products;
+          console.log(products)
+          const productsList = document.createElement('ul');
+
+          products.forEach((product) => {
+            console.log(product)
+            const productItem = document.createElement('li');
+            let date = product.purchase_date;
+
+            productItem.innerHTML = product.name + ' - ' + product.price + ' €' + ' date d\'achat : '+ date.slice(0,10)+ ' '+ date.slice(11,19);
+            productsList.appendChild(productItem);
+          });
+          document.getElementById('produitsList').appendChild(productsList);
+        }
+      });
   </script>
   <script>
     //discord stuff
