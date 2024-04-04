@@ -1,6 +1,6 @@
 import express from 'express';
 const router = express.Router();
-import {pool} from '../../server.js';
+import {pool,getGradePrices} from '../../server.js';
 
 router.post('', async (req, res) => {
   const {ironprice, goldprice, diamantprice} = req.body;
@@ -49,6 +49,7 @@ router.post('', async (req, res) => {
   );
 
   res.status(200).json({success: true});
+  getGradePrices();
 });
 
 export default router;
