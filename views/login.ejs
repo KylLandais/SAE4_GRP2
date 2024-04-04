@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Connexion</title>
+    <title id="titre">Connexion</title>
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
   </head>
@@ -206,6 +206,8 @@
           'data-shown',
           registerForm.getAttribute('data-shown') === 'true' ? 'false' : 'true'
         );
+        document.getElementById("connexionTitle").innerHTML = registerForm.getAttribute('data-shown') === 'true' ? 'Inscription' : 'Connexion'
+
       }
     </script>
     <script src="/js/main.js"></script>
