@@ -520,6 +520,9 @@ app.use('/api/help/changePassword', changePassword);
 import freeCheckout from './api/payment/checkout.js';
 app.use('/api/payment/checkout', freeCheckout);
 
+import changeQuantity from './api/payment/changeQuantity.js';
+app.use('/api/payment/quantity', changeQuantity);
+
 // '/account/'
 
 import verifyEmail from './api/account/verifyEmail.js';

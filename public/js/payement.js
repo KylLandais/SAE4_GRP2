@@ -1,3 +1,5 @@
+
+
 let step = 1;
 
 function checkEmptyCart() {
@@ -88,27 +90,32 @@ document.getElementById('payButton').addEventListener('click', () => {
   checkout(cart);
 });
 
+function quantityChanged(cpt, id) {
+  let listOfItems = []
 
-function changeNumber(cpt) {
-  fetch("/api/user/getCartItems", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
+  listOfItems[0] = document.getElementById('productQuantity_' + id).getAttribute('value')
+  listOfItems[1] = cpt
+  listOfItems[2] = document.getElementById('priceTitle').innerHTML
+
+  fetch('/api/payment/quantity', {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        items: listOfItems
+      }),
   })
     .then((res) => res.json())
     .then((data) => {
       if (data.success) {
-        cart = data.items;
+      } else if (data.error) {
+        userAlert(data.error);
       } else {
-        userAlert("Une erreur est survenue")}});
-  document.getElementById("productPrice" + cart[cpt].identifier.id).innerHTML = 
-  document.getElementById("productQuantity" + cart[cpt].identifier.id).getAttribute("value") * cart[cpt].price
-        
-  cart[' + cpt + '].quantity = +document.getElementById("productQuantity" + cart[cpt].identifier.id).getAttribute("value") ; console.log(cart);
-  console.log(document.getElementById("productQuantity" + cart[cpt].identifier.id ).getAttribute("value"));
-  console.log(document.getElementById("productQuantity" + cart[cpt].identifier.id ).innerHTML); cart[cpt].quantity = 45;
-  session.cart = cart
+        userAlert("Une erreur est survenue");
+      }
+    });
+      
 }
 
 function useCartItems(cart) {
@@ -139,18 +146,19 @@ function useCartItems(cart) {
     quantity.setAttribute('min', 1)
     quantity.setAttribute('value', item.quantity)
     quantity.setAttribute('step', 1)
-    quantity.setAttribute("id", "productQuantity" + item.identifier.id);
+    quantity.setAttribute("id", "productQuantity_" + item.identifier.id);
+
     if (item.identifier.type === "product") {
-      quantity.setAttribute('onchange', 'changeNumber(' + cpt + ')')
+      quantity.setAttribute('onchange', 'quantityChanged(' + cpt +', ' + item.identifier.id +')')
     } else {
       quantity.setAttribute('max', 1)
     }
     cpt++
 
-    const price = item.price;
+    const price = item.price * item.quantity;
     total += price;
     priceElement.innerText = price.toFixed(2) + '€';
-    priceElement.setAttribute("id", "productPrice" + item.identifier.id);
+    priceElement.setAttribute("id", "productPrice_" + item.identifier.id);
 
 
     toggleSelector.classList.add('toggleSelector');
