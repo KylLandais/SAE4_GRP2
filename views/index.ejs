@@ -219,6 +219,34 @@
   <script>
     const grade = '<%= grade %>';
 
+    const reduction = 0
+    const diam = parseInt('<%= diamantprice %>')
+    const gold = parseInt('<%= goldprice %>')
+    const iron = parseInt('<%= ironprice %>')
+
+    if (grade === "1") {
+      reduction = parseInt("<%= goldprice %>")
+    } else if (grade === "0") {
+      reduction = parseInt("<%= ironprice %>")
+    }
+
+    if (grade != "None") {
+      document.getElementById('ironButton').innerHTML = "-";
+      document.getElementById("ironButton").disabled = true;
+      document.getElementById("ironButton").className = "gradeBuyButton b0 disabled";
+    }
+
+    if (grade === "2") {
+      document.getElementById('goldButton').innerHTML = "-";
+      document.getElementById("goldButton").disabled = true;
+      document.getElementById("goldButton").className = "gradeBuyButton b1 disabled";
+    } else {
+      document.getElementById('goldButton').innerHTML = gold - reduction;
+    }
+
+    document.getElementById('diamButton').innerHTML = grade
+    //document.getElementById('diamButton').innerHTML = diam - reduction;
+
     if (grade === "2") {
       document.getElementById("diamButton").disabled = true;
       document.getElementById("diamButton").className = "gradeBuyButton b2 disabled";
@@ -227,9 +255,6 @@
       document.getElementById("goldButton").disabled = true;
       document.getElementById("goldButton").className = "gradeBuyButton b1 disabled";
 
-    } if (grade >= "0") { 
-      document.getElementById("ironButton").disabled = true;
-      document.getElementById("ironButton").className = "gradeBuyButton b0 disabled";
     }
 
     const decodedData = JSON.parse('<%- JSON.stringify(events) %>');
